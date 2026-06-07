@@ -17,6 +17,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
+    "test": "node scripts/smoke.mjs",
     "prepare": "npm run build"
   },
   "keywords": [

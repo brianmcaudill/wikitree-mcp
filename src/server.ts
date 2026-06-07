@@ -40,10 +40,10 @@ const depth = z
   .int()
   .min(1)
   .max(10)
-  .optional()
+  .default(3)
   .describe(
-    "Number of generations to retrieve (1-10). Each generation roughly doubles " +
-      "the result size, so prefer small values. WikiTree caps this at 10."
+    "Number of generations to retrieve (1-10, default 3). Each generation " +
+      "roughly doubles the result size, so prefer small values. WikiTree caps this at 10."
   );
 
 // `fields` arrives as free text from the MCP caller; wikitree-js types it as a
@@ -134,15 +134,16 @@ export function createServer(): McpServer {
         depth,
         bioFormat,
         fields,
-        resolveRedirect,
       },
       annotations: READ_ONLY,
     },
-    async ({ key, depth, bioFormat, fields, resolveRedirect }) => {
+    async ({ key, depth, bioFormat, fields }) => {
       try {
-        const ancestors = await wikitree.getAncestors(
-          key,
-          { depth, bioFormat, fields: asFields(fields), resolveRedirect },
+        // The getAncestors API action is deprecated server-side. The modern
+        // equivalent is getPeople with ancestors=<generations>.
+        const ancestors = await wikitree.getPeople(
+          [key],
+          { ancestors: depth, bioFormat, fields: asFields(fields) },
           await getOptions()
         );
         return ok(ancestors);
@@ -165,15 +166,16 @@ export function createServer(): McpServer {
         depth,
         bioFormat,
         fields,
-        resolveRedirect,
       },
       annotations: READ_ONLY,
     },
-    async ({ key, depth, bioFormat, fields, resolveRedirect }) => {
+    async ({ key, depth, bioFormat, fields }) => {
       try {
-        const descendants = await wikitree.getDescendants(
-          key,
-          { depth, bioFormat, fields: asFields(fields), resolveRedirect },
+        // The getDescendants API action is deprecated server-side. The modern
+        // equivalent is getPeople with descendants=<generations>.
+        const descendants = await wikitree.getPeople(
+          [key],
+          { descendants: depth, bioFormat, fields: asFields(fields) },
           await getOptions()
         );
         return ok(descendants);

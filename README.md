@@ -24,7 +24,8 @@ auto-approve them). People are identified by a WikiTree ID *key* shaped
 | `get_ancestors` | Walk up `depth` generations (parents, grandparents, …). |
 | `get_descendants` | Walk down `depth` generations (children, grandchildren, …). |
 | `get_relatives` | Immediate parents/children/spouses/siblings for one or more keys, in one call. |
-| `call_api` | Escape hatch for any documented WikiTree read action (e.g. `searchPerson`). See the [WikiTree API docs](https://github.com/wikitree/wikitree-api). |
+| `search_person` | Search for people by name, dates, places, and/or parents' names. Returns matches with their Name keys. |
+| `call_api` | Escape hatch for any other documented WikiTree read action. See the [WikiTree API docs](https://github.com/wikitree/wikitree-api). |
 
 ## Setup
 

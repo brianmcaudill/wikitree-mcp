@@ -28,8 +28,15 @@ try {
   // 1. Tool registration + read-only annotations
   const { tools } = await client.listTools();
   const names = tools.map((t) => t.name).sort();
-  const expected = ["call_api", "get_ancestors", "get_descendants", "get_person", "get_relatives"];
-  check("listTools returns all 5 tools", JSON.stringify(names) === JSON.stringify(expected), names.join(", "));
+  const expected = [
+    "call_api",
+    "get_ancestors",
+    "get_descendants",
+    "get_person",
+    "get_relatives",
+    "search_person",
+  ];
+  check("listTools returns all 6 tools", JSON.stringify(names) === JSON.stringify(expected), names.join(", "));
   check("every tool is read-only", tools.every((t) => t.annotations?.readOnlyHint === true));
 
   // 2. get_person
@@ -48,7 +55,18 @@ try {
   r = await client.callTool({ name: "get_relatives", arguments: { keys: [PERSON], getParents: true } });
   check("get_relatives ok", r.isError !== true && textOf(r).length > 0);
 
-  // 6. call_api — the cast-typed escape hatch; the path tsc cannot vouch for
+  // 6. search_person — name search; expects matches back
+  r = await client.callTool({
+    name: "search_person",
+    arguments: { firstName: "Samuel", lastName: "Clemens", limit: 5 },
+  });
+  check(
+    "search_person ok",
+    r.isError !== true && textOf(r).includes("matches") && textOf(r).includes("Clemens"),
+    "search Samuel Clemens"
+  );
+
+  // 7. call_api — the cast-typed escape hatch; the path tsc cannot vouch for
   r = await client.callTool({ name: "call_api", arguments: { action: "getPerson", params: { key: PERSON } } });
   check("call_api ok", r.isError !== true && textOf(r).includes(PERSON), "raw getPerson via passthrough");
 } finally {

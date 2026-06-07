@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+  # Note: `npm test` (scripts/smoke.mjs) is intentionally NOT run in CI — it
+  # makes live calls to the public WikiTree API and would make CI flaky and
+  # dependent on an external service. Run it locally with `npm test`.

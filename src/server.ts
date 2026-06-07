@@ -223,6 +223,103 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
+    "search_person",
+    {
+      title: "Search People",
+      description:
+        "Search WikiTree for people matching any combination of name, dates, " +
+        "places, and parents' names. Returns a 'matches' array (each with a " +
+        "Name key and the requested fields) plus a total count; page large " +
+        "result sets with start/limit. Provide at least one search criterion. " +
+        "Then use get_person with a match's Name key for the full profile.",
+      inputSchema: {
+        firstName: z.string().optional().describe("First (given) name."),
+        lastName: z.string().optional().describe("Last name at birth."),
+        birthDate: z
+          .string()
+          .optional()
+          .describe("Birth date as YYYY-MM-DD (year-only is fine, e.g. 1850-00-00)."),
+        deathDate: z.string().optional().describe("Death date as YYYY-MM-DD."),
+        birthLocation: z
+          .string()
+          .optional()
+          .describe("Birth place, any granularity (e.g. 'Kentucky' or 'Letcher, Kentucky')."),
+        deathLocation: z.string().optional().describe("Death place."),
+        gender: z.enum(["Male", "Female"]).optional().describe("Gender."),
+        fatherFirstName: z.string().optional().describe("Father's first name."),
+        fatherLastName: z.string().optional().describe("Father's last name."),
+        motherFirstName: z.string().optional().describe("Mother's first name."),
+        motherLastName: z.string().optional().describe("Mother's last name."),
+        fields: z
+          .array(z.string())
+          .optional()
+          .describe(
+            "Profile fields to return for each match (e.g. 'Name', 'BirthDate'). " +
+              "Omit for a sensible default set including the Name key."
+          ),
+        limit: z
+          .number()
+          .int()
+          .min(1)
+          .max(100)
+          .default(10)
+          .describe("Max matches to return (1-100, default 10)."),
+        start: z
+          .number()
+          .int()
+          .min(0)
+          .default(0)
+          .describe("Offset into the result set, for paging (default 0)."),
+      },
+      annotations: READ_ONLY,
+    },
+    async (args) => {
+      // Default field set so matches are usable immediately — without `fields`,
+      // searchPerson returns only profile IDs. `Name` is the key get_person needs.
+      const DEFAULT_FIELDS =
+        "Id,Name,FirstName,LastNameAtBirth,LastNameCurrent,BirthDate,DeathDate,BirthLocation,DeathLocation";
+
+      // Map our camelCase params to WikiTree's API parameter names, dropping
+      // anything the caller didn't set.
+      const request: Record<string, unknown> = { action: "searchPerson" };
+      const mapped: Record<string, unknown> = {
+        FirstName: args.firstName,
+        LastName: args.lastName,
+        BirthDate: args.birthDate,
+        DeathDate: args.deathDate,
+        BirthLocation: args.birthLocation,
+        DeathLocation: args.deathLocation,
+        Gender: args.gender,
+        fatherFirstName: args.fatherFirstName,
+        fatherLastName: args.fatherLastName,
+        motherFirstName: args.motherFirstName,
+        motherLastName: args.motherLastName,
+        limit: args.limit,
+        start: args.start,
+      };
+      for (const [key, value] of Object.entries(mapped)) {
+        if (value !== undefined) request[key] = value;
+      }
+      request.fields = args.fields?.length ? args.fields.join(",") : DEFAULT_FIELDS;
+
+      try {
+        // searchPerson is not in wikitree-js's typed action union; cast through
+        // the same escape hatch call_api uses. Read-only GET action.
+        const result = await wikitree.wikiTreeGet(
+          request as unknown as Parameters<typeof wikitree.wikiTreeGet>[0],
+          await getOptions()
+        );
+        return ok(result);
+      } catch (e) {
+        return fail(
+          `Search failed: ${(e as Error).message}. Provide at least one search ` +
+            "criterion (name, date, place, or parent name)."
+        );
+      }
+    }
+  );
+
+  server.registerTool(
     "call_api",
     {
       title: "Call WikiTree API",

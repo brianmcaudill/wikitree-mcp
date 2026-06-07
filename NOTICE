@@ -1,0 +1,17 @@
+wikitree-mcp
+Copyright 2026 Brian Caudill
+
+This product includes software derived from "wikitree-mcp"
+(https://github.com/PeWu/wikitree-mcp) by Przemek Więch, licensed under the
+Apache License, Version 2.0.
+
+Modifications by Brian Caudill (2026):
+  - Rewritten on the MCP TypeScript SDK high-level API (McpServer /
+    registerTool) with zod input schemas and tool annotations.
+  - stdio-only transport; the legacy HTTP+SSE transport was removed.
+  - Tightened parameter schemas, marked all tools read-only, and added
+    recoverable error messages.
+
+Genealogy data is provided by WikiTree (https://www.wikitree.com) via the
+wikitree-js library. WikiTree is a trademark of Interesting.com, Inc. This
+project is not affiliated with or endorsed by WikiTree.

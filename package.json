@@ -1,0 +1,40 @@
+{
+  "name": "wikitree-mcp",
+  "version": "1.0.0",
+  "description": "Read-only MCP server for the WikiTree genealogy API",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "wikitree-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "wikitree",
+    "genealogy"
+  ],
+  "author": "Brian Caudill",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "dotenv": "^17.4.2",
+    "wikitree-js": "^0.5.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "typescript": "^5.9.3"
+  }
+}
